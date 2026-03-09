@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مسابقات عزيز</title>
+    <style>
+        .option {
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.2), rgba(255, 0, 193, 0.2));
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}
+
+.option:hover {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+    box-shadow: 0 0 20px var(--neon-pink);
+    transform: translateY(-3px);
+}
+        body { background: #1a1a2e; color: #fff; font-family: 'Cairo', sans-serif; text-align: center; }
+        .card { background: #16213e; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); margin: 20px; }
+        .btn { background: #e94560; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #ff2e63; }
+        .option-btn { display: block; width: 100%; margin: 10px 0; background: #0f3460; border: 1px solid #e94560; color: white; padding: 15px; border-radius: 10px; }
+        #player-list { list-style: none; padding: 0; }
+        .score-badge { background: #4ecca3; padding: 2px 8px; border-radius: 5px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🏆 مسابقات عزيز 🏆</h1>
+
+   
+
+    
+    <div id="login-screen" class="card">
+        <button class="btn" onclick="startHost()">أنا المضيف (إنشاء غرفة)</button>
+        <hr>
+        <input type="text" id="p-name" placeholder="اسمك">
+        <input type="number" id="r-code" placeholder="كود الغرفة">
+        <button class="btn" onclick="startGuest()">دخول كمتسابق</button>
+    </div>
+
+    <div id="host-screen" class="card" style="display:none;">
+        <h2>كود الغرفة: <span id="display-code" style="color:#e94560;">---</span></h2>
+        <div id="question-control">
+            <button class="btn" onclick="nextQuestion()">إرسال السؤال التالي</button>
+        </div>
+        <h3>المتسابقون:</h3>
+        <ul id="player-list"></ul>
+    </div>
+
+    <div id="guest-screen" class="card" style="display:none;">
+        <h2 id="q-text">انتظر بدء السؤال...</h2>
+        <div id="options-container"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentRoom = "";
+
+        // منطق المضيف
+        function startHost() {
+            socket.emit('createRoom');
+        }
+
+        socket.on('roomCreated', (code) => {
+            currentRoom = code;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('host-screen').style.display = 'block';
+            document.getElementById('display-code').innerText = code;
+        });
+
+        // منطق الضيف
+        function startGuest() {
+            const name = document.getElementById('p-name').value;
+            const code = document.getElementById('r-code').value;
+            socket.emit('joinRoom', { roomId: code, playerName: name });
+        }
+
+        socket.on('joinSuccess', (code) => {
+            currentRoom = code;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('guest-screen').style.display = 'block';
+        });
+
+        // تحديث القائمة والأسئلة (تكملة المنطق البرمجي...)
+    </script>
+</body>
+</html>
